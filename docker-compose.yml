@@ -1,0 +1,55 @@
+version: '3.7'
+
+services:
+
+    postgres:
+        image: postgres:latest
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+        volumes:
+            - ./postgres_data:/data
+        networks:
+            - dpf_network
+        restart: always
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+            interval: 10s
+            timeout: 8s
+            retries: 5
+
+    redis:
+        image: redis:latest
+        volumes:
+            - ./redis_data:/data
+        networks:
+            - dpf_network
+        healthcheck:
+            test: [ "CMD-SHELL", "redis-cli ping" ]
+            interval: 10s
+            timeout: 8s
+            retries: 5
+
+    rq-worker-default:
+        image: rq-worker:latest
+        build:
+            context: .
+            dockerfile: docker/rq_worker.Dockerfile
+        environment:
+            QUEUE: default
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        networks:
+            - dpf_network
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        restart: always
+
+networks:
+    dpf_network:
+        driver: bridge
+        name: dpf_network
