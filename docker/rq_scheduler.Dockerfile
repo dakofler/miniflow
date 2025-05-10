@@ -24,4 +24,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-CMD ["sh", "-c", "rq worker --with-scheduler --url redis://$REDIS_HOST:$REDIS_PORT default"]
+CMD ["sh", "-c", "rqscheduler --host $REDIS_HOST --port $REDIS_PORT --db 0"]

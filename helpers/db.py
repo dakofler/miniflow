@@ -3,7 +3,6 @@
 from os import getenv
 
 from redis import Redis
-from rq import Queue
 from sqlalchemy import Engine, create_engine
 
 POSTGRES_USER = getenv("POSTGRES_USER", "postgres")
@@ -19,12 +18,6 @@ REDIS_PORT = int(getenv("REDIS_PORT", 6379))
 def get_redis_conn() -> Redis:
     redis_conn = Redis(REDIS_HOST, REDIS_PORT)
     return redis_conn
-
-
-def get_redis_queue() -> Queue:
-    redis_conn = get_redis_conn()
-    queue = Queue(connection=redis_conn)
-    return queue
 
 
 def get_postgres_conn(database: str) -> Engine:

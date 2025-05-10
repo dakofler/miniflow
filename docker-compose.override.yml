@@ -2,10 +2,17 @@ services:
     postgres:
         ports:
             - "5432:5432"
+
     redis:
         ports:
             - "6379:6379"
-    rq-worker-default:
+
+    rq-worker:
+        volumes:
+            - ./jobs:/app/jobs
+            - ./helpers:/app/helpers
+
+    rq-scheduler:
         volumes:
             - ./jobs:/app/jobs
             - ./helpers:/app/helpers

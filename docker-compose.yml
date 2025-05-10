@@ -29,7 +29,7 @@ services:
             timeout: 8s
             retries: 5
 
-    rq-worker-default:
+    rq-worker:
         image: rq-worker:latest
         build:
             context: .
@@ -40,7 +40,28 @@ services:
             POSTGRES_DB: postgres
             POSTGRES_HOST: postgres
             POSTGRES_PORT: 5432
-            QUEUE: default
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        networks:
+            - dpf_network
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        restart: always
+
+    rq-scheduler:
+        image: rq-scheduler:latest
+        build:
+            context: .
+            dockerfile: docker/rq_scheduler.Dockerfile
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+            POSTGRES_HOST: postgres
+            POSTGRES_PORT: 5432
             REDIS_HOST: redis
             REDIS_PORT: 6379
         networks:

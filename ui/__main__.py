@@ -1,5 +1,10 @@
+"""UI."""
+
+from jobs import schedule
+
+
 def main():
-    print("Hello from data-processing-framework!")
+    schedule()
 
 
 if __name__ == "__main__":
