@@ -17,6 +17,7 @@ FROM python:3.12-slim
 
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
+COPY helpers/ /app/helpers/
 COPY jobs/ /app/jobs/
 
 ENV PATH="/app/.venv/bin:$PATH"
