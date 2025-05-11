@@ -1,13 +1,11 @@
 """Data ingestion job."""
 
-from logging import getLogger
-
 from pandas import DataFrame, read_csv
 
-from helpers.db import get_postgres_conn
+from data_processing_framework.common import get_logger, get_postgres_conn
 
 DATA_URL = "https://gist.githubusercontent.com/netj/8836201/raw/6f9306ad21398ea43cba4f7d537619d0e07d5ae3/iris.csv"
-LOGGER = getLogger(__file__)
+LOGGER = get_logger(__file__)
 
 
 def ingest_data() -> None:
