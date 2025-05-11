@@ -1,5 +1,17 @@
 """Jobs."""
 
-from data_processing_framework.jobs.dummy import test_1_hour, test_5_min, test_15_min
+from typing import Any, Callable, TypedDict
 
-JOBS = [test_5_min, test_15_min, test_1_hour]
+from data_processing_framework.jobs.dummy import test_5_min, test_15_min
+
+
+class Job(TypedDict):
+    func: Callable[[Any], Any]
+    args: tuple[Any, ...]
+    kwargs: dict[str, Any]
+
+
+JOBS: list[Job] = [
+    {"func": test_5_min, "args": (), "kwargs": {}},
+    {"func": test_15_min, "args": (), "kwargs": {}},
+]

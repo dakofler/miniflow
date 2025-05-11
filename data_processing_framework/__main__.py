@@ -11,11 +11,11 @@ def main() -> None:
 
     # cancel scheduled jobs
     for job in queue.jobs:
-        job.delete()
+        job.cancel()
 
     # schedule jobs
     for job in JOBS:
-        scheduled_job = queue.enqueue(job)
+        scheduled_job = queue.enqueue(job["func"], *job["args"], **job["kwargs"])
         LOGGER.info(f"Scheduled job {scheduled_job.description}.")
 
 
