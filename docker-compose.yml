@@ -1,22 +1,5 @@
 services:
-    postgres:
-        image: postgres:latest
-        environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_DB: postgres
-        ports:
-            - "5432:5432"
-        volumes:
-            - ./postgres_data:/var/lib/postgresql/data
-        networks:
-            - dpf_network
-        restart: always
-        healthcheck:
-            test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
-            interval: 10s
-            timeout: 8s
-            retries: 5
+    # database for jobs and queues
     redis:
         image: redis:latest
         volumes:
@@ -28,28 +11,32 @@ services:
             interval: 10s
             timeout: 8s
             retries: 5
+
+    # job to initially schedule jobs
     rq-scheduler: &base
         build:
             context: .
             dockerfile: docker/.Dockerfile
         environment:
-            POSTGRES_HOST: postgres
-            POSTGRES_PORT: 5432
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_DB: postgres
             REDIS_HOST: redis
             REDIS_PORT: 6379
         networks:
             - dpf_network
         depends_on:
-            - postgres
             - redis
         command: scheduler
+
+    # worker to run jobs
     rq-worker:
         <<: *base
         command: worker
         restart: always
+        deploy:
+            mode: replicated
+            replicas: 2
+            endpoint_mode: vip
+
+    # dashboard to monitor jobs
     rq-dashboard:
         <<: *base
         ports:
@@ -58,5 +45,3 @@ services:
 
 networks:
     dpf_network:
-        driver: bridge
-        name: dpf_network

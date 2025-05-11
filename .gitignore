@@ -1,2 +1,4 @@
 postgres_data
 redis_data
+TODO.md
+*-docker-compose.override.yml

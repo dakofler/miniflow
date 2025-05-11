@@ -20,6 +20,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-COPY ./data_processing_framework /app/data_processing_framework
+COPY ./miniflow /app/miniflow
 
 ENTRYPOINT ["/entrypoint.sh"]
