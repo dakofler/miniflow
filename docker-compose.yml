@@ -26,7 +26,7 @@ services:
             interval: 10s
             timeout: 8s
             retries: 5
-    init-schedule: &base
+    rq-scheduler: &base
         build:
             context: .
             dockerfile: docker/.Dockerfile
@@ -43,14 +43,10 @@ services:
         depends_on:
             - postgres
             - redis
-        command: schedule_jobs
+        command: scheduler
     rq-worker:
         <<: *base
         command: worker
-        restart: always
-    rq-scheduler:
-        <<: *base
-        command: scheduler
         restart: always
 
 networks:

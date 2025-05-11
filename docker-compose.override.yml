@@ -7,11 +7,8 @@ services:
         ports:
             - "6379:6379"
 
-    init-schedule: &base
+    rq-scheduler: &base
         volumes:
             - ./data_processing_framework:/app/data_processing_framework
     rq-worker:
-        <<: *base
-
-    rq-scheduler:
         <<: *base

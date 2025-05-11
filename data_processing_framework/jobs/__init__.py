@@ -1,6 +1,5 @@
 """Jobs."""
 
-from data_processing_framework.jobs.dummy import hello, hi
-from data_processing_framework.jobs.ingest_data import ingest_data
+from data_processing_framework.jobs.dummy import test_1_hour, test_5_min, test_15_min
 
-__all__ = ["hello", "hi", "ingest_data"]
+JOBS = [test_5_min, test_15_min, test_1_hour]
