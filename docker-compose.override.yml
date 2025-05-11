@@ -1,14 +1,11 @@
 services:
-    postgres:
-        ports:
-            - "5432:5432"
-
     redis:
         ports:
             - "6379:6379"
-
     rq-scheduler: &base
         volumes:
             - ./data_processing_framework:/app/data_processing_framework
     rq-worker:
+        <<: *base
+    rq-dashboard:
         <<: *base
