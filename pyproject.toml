@@ -1,12 +1,18 @@
 [project]
 name = "miniflow"
 version = "0.1.0"
-description = "Minimal job scheduling and execution framework based on Python RQ."
-readme = "README.md"
+description = "Minimal, ready-to-use job scheduling and execution built on Python RQ"
 authors = [{ name = "Daniel Kofler", email = "dkofler@outlook.com" }]
 license = { text = "BSD" }
 requires-python = ">=3.12"
 dependencies = ["rq>=2.3.3", "rq-dashboard>=0.8.2.2"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/miniflow"]
 
 [tool.ruff]
 line-length = 100

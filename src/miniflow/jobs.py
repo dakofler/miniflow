@@ -1,13 +1,28 @@
 """Job scheduling."""
 
 from datetime import datetime, timedelta
+from enum import StrEnum
+from os import getenv
 from typing import Any, Callable, Optional
 
-from miniflow.common import get_logger, get_redis_queue
+from redis import Redis
+from rq import Queue as _Queue
 
-__all__ = ["DAILY", "HOURLY", "MONTHLY", "WEEKLY", "Job", "Schedule", "schedule_jobs"]
+__all__ = ["DAILY", "HOURLY", "MONTHLY", "WEEKLY", "Job", "Queue", "Schedule", "schedule"]
 
-LOGGER = get_logger(__file__)
+
+class Queue(StrEnum):
+    HIGH = "high"
+    DEFAULT = "default"
+    LOW = "low"
+
+
+def get_redis_queue(name: Queue) -> _Queue:
+    host = getenv("REDIS_HOST", "localhost")
+    port = int(getenv("REDIS_PORT", 6379))
+    redis_conn = Redis(host, port)
+    queue = _Queue(name=name, connection=redis_conn)
+    return queue
 
 
 class Schedule:
@@ -17,7 +32,7 @@ class Schedule:
         self.at = at or datetime.now()
         self.repeat = repeat
 
-    def __str__(self):
+    def __repr__(self) -> str:
         return f"Schedule(at={self.at}, repeat={self.repeat})"
 
     def first_exec(self) -> datetime:
@@ -41,47 +56,40 @@ class Job:
     def __init__(
         self,
         func: Callable[[Any], Any],
-        schedule: Schedule,
+        schedule: Optional[Schedule] = None,
+        queue: Queue = Queue.DEFAULT,
         args: Optional[tuple[Any, ...]] = None,
         kwargs: Optional[dict[str, Any]] = None,
     ) -> None:
         self._func = func
-        self.description = func.__name__
+        self.schedule = schedule or Schedule()
+        self.queue = queue
         self.args = args or ()
         self.kwargs = kwargs or {}
-        self.schedule = schedule
 
-    def __str__(self):
+        self.description = func.__name__
+
+    def __repr__(self) -> str:
         return f"Job({self.description})"
 
     def __call__(self) -> Any:
         if self.schedule.repeat is not None:
-            queue = get_redis_queue()
+            queue = get_redis_queue(self.queue)
             next_exec = self.schedule.next_exec()
             queue.enqueue_at(
-                datetime=next_exec,
-                f=self,
-                description=self.description,
-                meta=self.meta(),
+                datetime=next_exec, f=self, description=self.description, meta=self.meta()
             )
         return self._func(*self.args, **self.kwargs)
 
     def meta(self) -> dict[str, str]:
-        return {"args": str(self.args), "kwargs": str(self.kwargs), "schedule": str(self.schedule)}
+        return {"args": str(self.args), "kwargs": str(self.kwargs), "schedule": repr(self.schedule)}
 
 
-def schedule_jobs(jobs: list[Job]) -> None:
+def schedule(jobs: list[Job]) -> None:
     """Enqueues a list of jobs to the Redis Queue."""
 
-    queue = get_redis_queue()
-
-    # cancel scheduled jobs
-    for job in queue.jobs:
-        job.cancel()
-
-    # schedule jobs
     for job in jobs:
+        queue = get_redis_queue(job.queue)
         _ = queue.enqueue_at(
             datetime=job.schedule.first_exec(), f=job, description=job.description, meta=job.meta()
         )
-        LOGGER.info(f"Scheduled job {job}.")
