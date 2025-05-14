@@ -10,6 +10,8 @@ from rq import Queue as _Queue
 
 __all__ = ["DAILY", "HOURLY", "MONTHLY", "WEEKLY", "Job", "Queue", "Schedule", "schedule"]
 
+REDIS_HOST = getenv("REDIS_HOST", "localhost")
+
 
 class Queue(StrEnum):
     HIGH = "high"
@@ -18,9 +20,7 @@ class Queue(StrEnum):
 
 
 def get_redis_queue(name: Queue) -> _Queue:
-    host = getenv("REDIS_HOST", "localhost")
-    port = int(getenv("REDIS_PORT", 6379))
-    redis_conn = Redis(host, port)
+    redis_conn = Redis(REDIS_HOST)
     queue = _Queue(name=name, connection=redis_conn)
     return queue
 

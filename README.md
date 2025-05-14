@@ -6,7 +6,7 @@ Minimal, ready-to-use job scheduling and execution built on [Python RQ](https://
 
 
 ## Requirements
-- Docker and Docker Compose to run Redis, workers and the dashboard.
+- Docker and Docker Compose to run Redis, workers, and the dashboard.
 
 ## Installation
 
@@ -30,20 +30,16 @@ def example_job_1():
     print("Hello from example job 1.")
 ```
 
-2. (Optional) Confige the number of runners via `replicas`.
-```YAML
-# ./docker-compose.yml
-
-deploy:
-    mode: replicated
-    replicas: 1  # set number of worker replicas
-    endpoint_mode: vip
-```
-
-3. Start workers and the dashboard (available at `localhost:9181`).
+3. Start Redis, workers, and the dashboard (available at http://localhost:9181/).
 ```bash
 docker compose up -d --build
 ```
+
+2. (Optional) Set environment variables
+
+| Variable       | Default     | Description                          |
+|----------------|-------------|--------------------------------------|
+| REDIS_HOST     | localhost   | Redis server hostname or IP address. |
 
 3. Configure your jobs and schedule them to run.
 ```Python

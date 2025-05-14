@@ -1,3 +1,15 @@
+x-base-config: &base
+    build:
+        context: .
+        dockerfile: docker/.Dockerfile
+    environment:
+        REDIS_HOST: redis
+    networks:
+        - dpf_network
+    depends_on:
+        - redis
+    restart: always
+
 services:
     # database for jobs and queues
     redis:
@@ -13,43 +25,24 @@ services:
             interval: 10s
             timeout: 8s
             retries: 5
-    # worker to run jobs
-    rq-worker: &base
-        build:
-            context: .
-            dockerfile: docker/.Dockerfile
-        command: worker
-        environment:
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
-        volumes:
-            - ./jobs:/app/jobs
-        networks:
-            - dpf_network
-        depends_on:
-            - redis
-        restart: always
-        deploy:
-            mode: replicated
-            replicas: 2
-            endpoint_mode: vip
 
     # dashboard to monitor jobs
     rq-dashboard:
-        build:
-            context: .
-            dockerfile: docker/.Dockerfile
+        <<: *base
         command: dashboard
-        environment:
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
         ports:
             - "9181:9181"
-        networks:
-            - dpf_network
-        depends_on:
-            - redis
-        restart: always
+
+    # worker to run jobs
+    rq-worker:
+        <<: *base
+        command: worker
+        volumes:
+            - ./jobs:/app/jobs
+        deploy:
+            mode: replicated
+            replicas: 1
+            endpoint_mode: vip
 
 networks:
     dpf_network:

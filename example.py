@@ -2,10 +2,13 @@
 
 from datetime import timedelta
 
+from dotenv import load_dotenv
+
 from jobs.jobs import example_job_1, example_job_2, example_job_3
 from miniflow import HOURLY, Job, Queue, Schedule, schedule
 
 if __name__ == "__main__":
+    load_dotenv(override=True)
     JOBS = [
         # run job now
         Job(example_job_1),
